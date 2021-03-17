@@ -68,11 +68,15 @@ Factories have the following signature:
 function(ContainerInterface $container) : mixed
 ```
 
+Factories may optionally implement `ServiceFactoryInterface`, which has the same signature for `__invoke`, as well as a `getDependencies` method, allowing the factory to list any well-known dependencies.
+
 Factories accept one parameter:
 
 - the container (instance of `Psr\Container\ContainerInterface`)
 
 Each factory is responsible for returning a given entry of the container. Nothing should be cached by service providers, this is the responsibility of the container.
+
+Factories that implement `ServiceFactoryInterface` may use the `getDependencies` method to provide a list of well-known dependency keys - containers may use this list to validate factory dependencies in advance, before attempting to resolve them. The list is for *advisory* validation only - the keys have no defined order, and the list may be either empty or incomplete.
 
 ### Extensions
 
