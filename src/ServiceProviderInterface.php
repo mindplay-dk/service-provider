@@ -5,41 +5,54 @@ namespace Interop\Container;
 use Psr\Container\ContainerInterface;
 
 /**
- * A service provider provides entries to a container.
+ * A service provider provides services and extensions to a container.
  */
 interface ServiceProviderInterface
 {
     /**
-     * Returns a list of all container entries registered by this service provider.
-     *
-     * - the key is the entry name
-     * - the value is a callable that will return the entry, aka the **factory**
-     *
-     * A factory is an instance of {@see FactoryDefinitionInterface}, or a `callable` with the following signature:
+     * Lists all of the service IDs supported by this provider.
      * 
-     *     function(\Psr\Container\ContainerInterface $container)
-     *
-     * @return array<string,((callable(ContainerInterface):mixed)|FactoryDefinitionInterface)>
+     * @return string[] list of service IDs
      */
-    public function getFactories(): array;
+    public function getServiceIDs(): array;
 
     /**
-     * Returns a list of all container entries extended by this service provider.
-     *
-     * - the key is the entry name
-     * - the value is a callable that will return the modified entry
-     *
-     * An extension is an instance of {@see ExtensionDefinitionInterface}, or a `callable` with the following signature:
+     * Create the service with the given ID.
      * 
-     *        function(Psr\Container\ContainerInterface $container, $previous)
-     *     or function(Psr\Container\ContainerInterface $container, $previous = null)
-     *
-     * About factories parameters:
-     *
-     * - the container (instance of `Psr\Container\ContainerInterface`)
-     * - the entry to be extended. If the entry to be extended does not exist and the parameter is nullable, `null` will be passed.
-     *
-     * @return array<string,((callable(ContainerInterface,mixed):mixed)|ExtensionDefinitionInterface)[]>
+     * Supported service IDs can be obtained from `getServiceIDs()` - using an unsupported
+     * service ID will throw a `NotFoundExceptionInterface`.
+     * 
+     * @param string $id ID of the service to create
+     * @param ContainerInterface $container the container to resolve service dependencies from
+     * 
+     * @return mixed the created service
+     * 
+     * @throws NotFoundExceptionInterface if the service ID is not supported
+     * @throws ServiceProviderExceptionInterface if the service could not be created
      */
-    public function getExtensions(): array;
+    public function createService(string $id, ContainerInterface $container): mixed;
+
+    /**
+     * Lists all of the extension IDs supported by this provider.
+     * 
+     * @return string[] list of extension IDs
+     */
+    public function getExtensionIDs(): array;
+
+    /**
+     * Extend the `$previous` service with the given ID.
+     * 
+     * Supported extension IDs can be obtained from `getExtensionIDs()` - using an unsupported
+     * extension ID will throw a `NotFoundExceptionInterface`.
+     * 
+     * @param string $id ID of the service to extend
+     * @param ContainerInterface $container the container to resolve extension dependencies from
+     * @param mixed $previous the previous service (which will be extended)
+     * 
+     * @return mixed the extended service
+     * 
+     * @throws NotFoundExceptionInterface if the extension ID is not supported
+     * @throws ServiceProviderExceptionInterface if the extension could not be applied
+     */
+    public function extendService(string $id, ContainerInterface $container, mixed $previous): mixed;
 }
